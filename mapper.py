@@ -11,7 +11,6 @@ What we are interested in is author_id and added_at.
 
 import sys
 import csv
-import datetime
 
 def mapper():
     reader = csv.reader(sys.stdin, delimiter='\t')
@@ -19,8 +18,10 @@ def mapper():
 
     _ = next(reader)
     for line in reader:
-	author_id, added_at = line[3], line[8]
-	time = datetime.datetime.strptime(added_at[:added_at.rfind('+')], '%Y-%m-%d %H:%M:%S.%f')
-        writer.writerow([author_id, time.hour])
+	tags, node_type = line[2], line[5]
+	if node_type != 'question':
+	    continue
+	for tag in tags.split():
+            writer.writerow([tag, 1])
 
 mapper()

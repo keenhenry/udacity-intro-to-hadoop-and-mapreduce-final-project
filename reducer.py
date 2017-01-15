@@ -1,26 +1,31 @@
 #!/usr/bin/python
 
 import sys
-from collections import defaultdict
+import heapq
 
-prev_author = None
-hour_dict = defaultdict(int)
+prev_tag = None
+top10_tags = []
+num_questions = 0
 
 for line in sys.stdin:
-    author, hour = line.strip().split('\t')
+    tag, count = line.strip().split('\t')
 
-    if prev_author and author != prev_author: # process to a new user
-	max_hour, max_freq = max(hour_dict.iteritems(), key=lambda t: t[1])
-	top_hours = list(h for h in hour_dict if hour_dict[h] == max_freq)
-	for h in top_hours:
-	    print '{author_id}\t{hour}'.format(author_id=prev_author, hour=h)
-	hour_dict.clear()
+    if prev_tag and tag != prev_tag: # process to a new tag
+	if len(top10_tags) < 10:
+	    heapq.heappush(top10_tags, (num_questions, prev_tag))
+	else: # len(top10_tags) >= 10
+	    heapq.heappushpop(top10_tags, (num_questions, prev_tag))
+	num_questions = 0
 
-    prev_author = author
-    hour_dict[hour.strip('"')] += 1
+    prev_tag = tag
+    num_questions += int(count.strip('"'))
 
-# print last record
-max_hour, max_freq = max(hour_dict.iteritems(), key=lambda t: t[1])
-top_hours = list(h for h in hour_dict if hour_dict[h] == max_freq)
-for h in top_hours:
-    print '{author_id}\t{hour}'.format(author_id=prev_author, hour=h)
+# calculation for the last tag processed
+if len(top10_tags) < 10:
+    heapq.heappush(top10_tags, (num_questions, prev_tag))
+else: # len(top10_tags) >= 10
+    heapq.heappushpop(top10_tags, (num_questions, prev_tag))
+
+# print top 10 tags
+for t in sorted(top10_tags, key=lambda t: t[0], reverse=True):
+    print '{tag}\t{num_questions}'.format(tag=t[1], num_questions=t[0])
