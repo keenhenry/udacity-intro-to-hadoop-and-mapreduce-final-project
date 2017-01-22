@@ -18,10 +18,10 @@ def mapper():
 
     _ = next(reader)
     for line in reader:
-	tags, node_type = line[2], line[5]
-	if node_type != 'question':
-	    continue
-	for tag in tags.split():
-            writer.writerow([tag, 1])
+	thread_id, author_id, node_type, parent_id = line[0], line[3], line[5], line[6]
+	if node_type == 'question':
+	    writer.writerow([thread_id, author_id])
+	else:
+	    writer.writerow([parent_id, author_id])
 
 mapper()
